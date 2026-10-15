@@ -1,0 +1,47 @@
+<h1>Hours</h1>
+<p class="muted">
+  Scheduled hours per person, for payroll. Shifts are counted on the day they start.
+</p>
+
+<form class="filters" (ngSubmit)="load()">
+  <label>
+    From
+    <input type="date" name="from" [(ngModel)]="from" required />
+  </label>
+  <label>
+    To
+    <input type="date" name="to" [(ngModel)]="to" required />
+  </label>
+  <button type="submit" class="primary">Update</button>
+  <button type="button" (click)="exportCsv()">Export CSV</button>
+</form>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th class="num">Shifts</th>
+      <th class="num">Hours</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track row.employeeId) {
+      <tr>
+        <td>{{ row.employeeName }}</td>
+        <td class="num">{{ row.shiftCount }}</td>
+        <td class="num">{{ row.totalHours | number: '1.0-2' }}</td>
+      </tr>
+    }
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Total</th>
+      <th></th>
+      <th class="num">{{ total() | number: '1.0-2' }}</th>
+    </tr>
+  </tfoot>
+</table>

@@ -1,0 +1,56 @@
+<h1>Team</h1>
+
+<div class="two-col">
+  <section>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (person of people(); track person.id) {
+          <tr>
+            <td>{{ person.fullName }}</td>
+            <td>{{ person.email }}</td>
+            <td>{{ person.role }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Add an employee</h2>
+    <form (ngSubmit)="add(addForm)" #addForm="ngForm">
+      <label>
+        Name
+        <input name="fullName" [(ngModel)]="form.fullName" required maxlength="120" />
+      </label>
+      <label>
+        Email
+        <input type="email" name="email" [(ngModel)]="form.email" required />
+      </label>
+      <label>
+        Temporary password
+        <input
+          name="temporaryPassword"
+          [(ngModel)]="form.temporaryPassword"
+          required
+          minlength="8"
+        />
+      </label>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+      @if (notice()) {
+        <p class="notice">{{ notice() }}</p>
+      }
+
+      <button type="submit" class="primary" [disabled]="saving() || addForm.invalid">Add</button>
+    </form>
+  </section>
+</div>

@@ -1,0 +1,160 @@
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.week-nav {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.grid-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.grid-wrap.loading {
+  opacity: 0.6;
+}
+
+.grid {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.grid th,
+.grid td {
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  padding: 0.4rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+.grid thead th {
+  font-weight: 600;
+  background: var(--surface-2);
+}
+
+.grid thead th span,
+.grid thead th small {
+  display: block;
+}
+
+.grid small {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.name-col {
+  width: 150px;
+}
+
+.name-col small {
+  display: block;
+}
+
+.hours-col {
+  width: 60px;
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.grid .today {
+  background: var(--today);
+}
+
+tr.me .name-col {
+  color: var(--accent);
+}
+
+.shift {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 0.3rem;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--muted);
+  border-radius: 4px;
+  background: var(--surface);
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+
+.shift.mine {
+  border-left-color: var(--accent);
+}
+
+.shift strong,
+.shift span {
+  display: block;
+}
+
+.add {
+  width: 100%;
+  padding: 0.1rem;
+  border: 1px dashed var(--line);
+  background: transparent;
+  color: var(--muted);
+  opacity: 0;
+}
+
+td:hover .add,
+.add:focus-visible {
+  opacity: 1;
+}
+
+.empty {
+  text-align: center !important;
+  padding: 2rem !important;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.25);
+}
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(380px, 100vw);
+  padding: 1.25rem;
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  overflow-y: auto;
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.row label {
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.spacer {
+  flex: 1;
+}

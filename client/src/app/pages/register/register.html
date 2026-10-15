@@ -1,0 +1,43 @@
+<section class="auth-card">
+  <h1>Set up your business</h1>
+  <p class="muted">You'll be the manager. You can add your staff after this.</p>
+
+  <form (ngSubmit)="submit()" #form="ngForm">
+    <label>
+      Business name
+      <input name="companyName" [(ngModel)]="companyName" required maxlength="120" />
+    </label>
+
+    <label>
+      Your name
+      <input name="fullName" [(ngModel)]="fullName" required maxlength="120" autocomplete="name" />
+    </label>
+
+    <label>
+      Email
+      <input type="email" name="email" [(ngModel)]="email" required autocomplete="email" />
+    </label>
+
+    <label>
+      Password <span class="muted">(at least 8 characters)</span>
+      <input
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        required
+        minlength="8"
+        autocomplete="new-password"
+      />
+    </label>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" class="primary" [disabled]="busy() || form.invalid">
+      {{ busy() ? 'Creating…' : 'Create account' }}
+    </button>
+  </form>
+
+  <p class="muted">Already have an account? <a routerLink="/login">Sign in</a></p>
+</section>

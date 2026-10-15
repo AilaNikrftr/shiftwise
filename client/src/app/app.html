@@ -1,0 +1,18 @@
+@if (auth.isLoggedIn()) {
+  <nav class="topbar">
+    <a routerLink="/schedule" class="brand">ShiftWise</a>
+    <a routerLink="/schedule" routerLinkActive="active">Schedule</a>
+    <a routerLink="/swaps" routerLinkActive="active">Swaps</a>
+    @if (auth.isManager()) {
+      <a routerLink="/team" routerLinkActive="active">Team</a>
+      <a routerLink="/hours" routerLinkActive="active">Hours</a>
+    }
+    <span class="spacer"></span>
+    <span class="who">{{ auth.user()?.fullName }}</span>
+    <button type="button" (click)="auth.logout()">Sign out</button>
+  </nav>
+}
+
+<main>
+  <router-outlet />
+</main>

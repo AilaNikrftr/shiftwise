@@ -1,0 +1,70 @@
+<h1>Shift swaps</h1>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+<h2>Waiting for approval</h2>
+@for (swap of pending(); track swap.id) {
+  <article class="card swap">
+    <div>
+      <strong>{{ swap.requestedByName }} → {{ swap.targetEmployeeName }}</strong>
+      <p>
+        {{ swap.shiftStartsAt | date: 'EEE MMM d, HH:mm' }}–{{ swap.shiftEndsAt | date: 'HH:mm' }} ·
+        {{ swap.position }}
+      </p>
+      @if (swap.note) {
+        <p class="muted">"{{ swap.note }}"</p>
+      }
+    </div>
+    <div class="actions">
+      @if (auth.isManager()) {
+        <button type="button" (click)="act(swap, 'reject')" [disabled]="busyId() === swap.id">
+          Reject
+        </button>
+        <button
+          type="button"
+          class="primary"
+          (click)="act(swap, 'approve')"
+          [disabled]="busyId() === swap.id"
+        >
+          Approve
+        </button>
+      } @else if (canCancel(swap)) {
+        <button type="button" (click)="act(swap, 'cancel')" [disabled]="busyId() === swap.id">
+          Cancel request
+        </button>
+      }
+    </div>
+  </article>
+} @empty {
+  <p class="muted">Nothing pending.</p>
+}
+
+<h2>History</h2>
+@if (history().length) {
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Shift</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (swap of history(); track swap.id) {
+        <tr>
+          <td>{{ swap.shiftStartsAt | date: 'MMM d, HH:mm' }} · {{ swap.position }}</td>
+          <td>{{ swap.requestedByName }}</td>
+          <td>{{ swap.targetEmployeeName }}</td>
+          <td>
+            <span class="badge" [attr.data-status]="swap.status">{{ swap.status }}</span>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else {
+  <p class="muted">No past requests.</p>
+}

@@ -1,0 +1,186 @@
+<header class="page-head">
+  <div>
+    <h1>Schedule</h1>
+    <p class="muted">
+      Week of {{ weekStart() | date: 'MMM d, y' }}
+      @if (auth.isManager()) {
+        · Click an empty cell to add a shift, or a shift to edit it.
+      } @else {
+        · Click one of your upcoming shifts to ask a coworker to take it.
+      }
+    </p>
+  </div>
+  <div class="week-nav">
+    <button type="button" (click)="moveWeek(-1)" aria-label="Previous week">‹</button>
+    <button type="button" (click)="thisWeek()">This week</button>
+    <button type="button" (click)="moveWeek(1)" aria-label="Next week">›</button>
+  </div>
+</header>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+@if (notice()) {
+  <p class="notice">{{ notice() }}</p>
+}
+
+<div class="grid-wrap" [class.loading]="loading()">
+  <table class="grid">
+    <thead>
+      <tr>
+        <th class="name-col">Staff</th>
+        @for (day of days(); track day.getTime()) {
+          <th [class.today]="isToday(day)">
+            <span>{{ day | date: 'EEE' }}</span>
+            <small>{{ day | date: 'MMM d' }}</small>
+          </th>
+        }
+        <th class="hours-col">Hours</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track row.employee.id) {
+        <tr [class.me]="row.employee.id === auth.user()?.id">
+          <th class="name-col">
+            {{ row.employee.fullName }}
+            @if (row.employee.role === 'Manager') {
+              <small>Manager</small>
+            }
+          </th>
+          @for (cell of row.cells; track $index) {
+            <td [class.today]="isToday(days()[$index])">
+              @for (shift of cell; track shift.id) {
+                <button
+                  type="button"
+                  class="shift"
+                  [class.mine]="isMine(shift)"
+                  (click)="openShift(shift)"
+                  [title]="shift.notes ?? ''"
+                >
+                  <strong
+                    >{{ shift.startsAt | date: 'HH:mm' }}–{{ shift.endsAt | date: 'HH:mm' }}</strong
+                  >
+                  <span>{{ shift.position }}</span>
+                </button>
+              }
+              @if (auth.isManager()) {
+                <button
+                  type="button"
+                  class="add"
+                  (click)="openCreate(row.employee, days()[$index])"
+                  [attr.aria-label]="'Add shift for ' + row.employee.fullName"
+                >
+                  +
+                </button>
+              }
+            </td>
+          }
+          <td class="hours-col">{{ row.hours | number: '1.0-1' }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="9" class="muted empty">No staff yet.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (panel(); as p) {
+  <div class="backdrop" (click)="closePanel()"></div>
+  <aside class="panel" role="dialog">
+    @if (p.kind === 'swap') {
+      <h2>Ask someone to take this shift</h2>
+      <p class="muted">
+        {{ p.shift.startsAt | date: 'EEE MMM d, HH:mm' }}–{{ p.shift.endsAt | date: 'HH:mm' }} ·
+        {{ p.shift.position }}
+      </p>
+
+      <form (ngSubmit)="requestSwap()">
+        <label>
+          Coworker
+          <select name="target" [(ngModel)]="swapForm.targetEmployeeId" required>
+            @for (person of coworkers(); track person.id) {
+              <option [ngValue]="person.id">{{ person.fullName }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Note <span class="muted">(optional)</span>
+          <textarea name="note" [(ngModel)]="swapForm.note" rows="2" maxlength="500"></textarea>
+        </label>
+
+        @if (panelError()) {
+          <p class="error">{{ panelError() }}</p>
+        }
+
+        <div class="actions">
+          <button type="button" (click)="closePanel()">Cancel</button>
+          <button type="submit" class="primary" [disabled]="saving()">Send request</button>
+        </div>
+      </form>
+    } @else {
+      <h2>{{ p.kind === 'edit' ? 'Edit shift' : 'New shift' }}</h2>
+
+      <form (ngSubmit)="saveShift()" #shiftForm="ngForm">
+        <label>
+          Employee
+          <select name="employee" [(ngModel)]="form.employeeId" required>
+            @for (person of employees(); track person.id) {
+              <option [ngValue]="person.id">{{ person.fullName }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Date
+          <input type="date" name="date" [(ngModel)]="form.date" required />
+        </label>
+
+        <div class="row">
+          <label>
+            Start
+            <input type="time" name="start" [(ngModel)]="form.start" required />
+          </label>
+          <label>
+            End
+            <input type="time" name="end" [(ngModel)]="form.end" required />
+          </label>
+        </div>
+
+        <label>
+          Position
+          <input
+            name="position"
+            [(ngModel)]="form.position"
+            required
+            maxlength="60"
+            placeholder="e.g. Barista"
+          />
+        </label>
+
+        <label>
+          Notes <span class="muted">(optional)</span>
+          <textarea name="notes" [(ngModel)]="form.notes" rows="2" maxlength="500"></textarea>
+        </label>
+
+        @if (panelError()) {
+          <p class="error">{{ panelError() }}</p>
+        }
+
+        <div class="actions">
+          @if (p.kind === 'edit') {
+            <button type="button" class="danger" (click)="deleteShift()" [disabled]="saving()">
+              Delete
+            </button>
+          }
+          <span class="spacer"></span>
+          <button type="button" (click)="closePanel()">Cancel</button>
+          <button type="submit" class="primary" [disabled]="saving() || shiftForm.invalid">
+            Save
+          </button>
+        </div>
+      </form>
+    }
+  </aside>
+}

@@ -1,0 +1,40 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.25rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.topbar a.active {
+  border-bottom-color: var(--accent);
+}
+
+.brand {
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.who {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
