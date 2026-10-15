@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { addDays, startOfWeek, toDateInput } from '../../core/dates';
 import { HoursRow } from '../../core/models';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-hours',
@@ -38,13 +39,21 @@ export class Hours implements OnInit {
 
   exportCsv(): void {
     const [from, to] = this.range();
+    this.download(this.api.hoursCsv(from, to), 'csv');
+  }
 
-    this.api.hoursCsv(from, to).subscribe({
+  exportXlsx(): void {
+    const [from, to] = this.range();
+    this.download(this.api.hoursXlsx(from, to), 'xlsx');
+  }
+
+  private download(request: Observable<Blob>, extension: string): void {
+    request.subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `hours_${this.from}_to_${this.to}.csv`;
+        link.download = `hours_${this.from}_to_${this.to}.${extension}`;
         link.click();
         URL.revokeObjectURL(url);
       },

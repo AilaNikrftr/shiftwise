@@ -58,6 +58,12 @@ export class ApiService {
     const params = new HttpParams().set('from', from).set('to', to);
     return this.http.get('/api/reports/hours/export', { params, responseType: 'blob' });
   }
+  
+  hoursXlsx(from: string, to: string): Observable<Blob> {
+    const params = new HttpParams().set('from', from).set('to', to);
+    return this.http.get('/api/reports/hours/export.xlsx', { params, responseType: 'blob' });
+  }
+
 }
 
 // The API returns ProblemDetails with the message in "title".
