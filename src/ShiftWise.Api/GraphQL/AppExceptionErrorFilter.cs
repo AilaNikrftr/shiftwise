@@ -28,7 +28,6 @@ public class AppExceptionErrorFilter : IErrorFilter
         return error
             .WithMessage(ex.Message)
             .WithCode(code)
-            .SetExtension("status", ex.StatusCode)
-            .RemoveException();
+            .SetExtension("status", ex.StatusCode);
     }
 }
