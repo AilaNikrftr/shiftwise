@@ -8,6 +8,7 @@ using ShiftWise.Api.Auth;
 using ShiftWise.Api.Common;
 using ShiftWise.Api.Data;
 using ShiftWise.Api.Domain;
+using ShiftWise.Api.GraphQL;
 using ShiftWise.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,6 +51,7 @@ builder.Services
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddOpenApi();
+builder.Services.AddShiftWiseGraphQL();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<AppExceptionHandler>();
 
@@ -74,6 +76,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapGraphQL("/graphql");
 
 // EnsureCreated keeps first-run setup to one command. Swap this for
 // migrations (dotnet ef migrations add InitialCreate) before the schema starts changing.
