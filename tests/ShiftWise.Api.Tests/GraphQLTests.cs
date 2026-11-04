@@ -12,7 +12,7 @@ namespace ShiftWise.Api.Tests;
 
 // Runs real GraphQL documents against the same schema Program.cs serves,
 // with the in-memory TestData database behind the services.
-public class GraphQLTests : IDisposable
+public class GraphQLTests : IAsyncLifetime
 {
     private readonly TestData _data = new();
     private readonly ServiceProvider _services;
@@ -55,10 +55,8 @@ public class GraphQLTests : IDisposable
         var request = OperationRequestBuilder.New()
             .SetDocument(document)
             .SetServices(scope.ServiceProvider);
-        if (user is not null)
-        {
-            request.SetUser(SignedIn(user));
-        }
+        // ASP.NET Core gives anonymous requests an unauthenticated principal, not null.
+        request.SetUser(user is null ? new ClaimsPrincipal(new ClaimsIdentity()) : SignedIn(user));
 
         var result = (IOperationResult)await executor.ExecuteAsync(request.Build());
 
@@ -175,9 +173,12 @@ public class GraphQLTests : IDisposable
         Assert.Equal(_data.Bob.Id, _data.Db.Shifts.Single().EmployeeId);
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    // The GraphQL executor only supports async disposal.
+    public async Task DisposeAsync()
     {
-        _services.Dispose();
+        await _services.DisposeAsync();
         _data.Dispose();
     }
 }
