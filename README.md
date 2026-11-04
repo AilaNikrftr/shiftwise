@@ -4,7 +4,7 @@ Shift scheduling for small businesses like cafés, clinics and shops. Managers b
 
 Each business only ever sees its own staff, shifts and requests, even though they all share one database.
 
-**Stack:** C# / ASP.NET Core 10 Web API · Entity Framework Core · SQL Server · Angular 21 · xUnit · Vitest · GitHub Actions
+**Stack:** C# / ASP.NET Core 10 Web API · GraphQL (Hot Chocolate) · Entity Framework Core · SQL Server · Angular 21 · xUnit · Vitest · GitHub Actions
 
 ## Features
 
@@ -77,6 +77,40 @@ All routes except register and login need `Authorization: Bearer <token>`.
 | GET    | `/api/reports/hours/export`    | manager   | Same, as CSV |
 
 Errors come back as `ProblemDetails` JSON with the reason in `title`. The OpenAPI document is at `/openapi/v1.json` in Development.
+
+## GraphQL
+
+The same features are also available as GraphQL at `POST /graphql` (Hot Chocolate), using the same JWT. Resolvers call the same services as the REST controllers, so company scoping, roles and business rules are enforced in one place, not twice.
+
+```graphql
+query Week {
+  shifts(from: "2030-03-04T00:00:00Z", to: "2030-03-11T00:00:00Z") {
+    id employeeName startsAt endsAt position
+  }
+  swaps { id status requestedByName targetEmployeeName }
+}
+
+mutation {
+  createShift(input: { employeeId: 2, startsAt: "2030-03-05T09:00:00Z",
+                       endsAt: "2030-03-05T17:00:00Z", position: "Barista" }) {
+    id employeeName
+  }
+}
+```
+
+| Field | Who |
+|---|---|
+| `employees`, `shifts(from, to)`, `swaps` | signed in |
+| `hoursReport(from, to)` | manager |
+| `createShift`, `updateShift`, `deleteShift`, `approveSwap`, `rejectSwap` | manager |
+| `requestSwap` | signed in |
+
+- Authorization uses `[Authorize]` / `[Authorize(Roles = ["Manager"])]`, so a missing token returns `AUTH_NOT_AUTHENTICATED` and an employee calling a manager field gets `AUTH_NOT_AUTHORIZED`.
+- Business-rule failures (overlapping shift, shift not found, ...) come back as GraphQL errors with the service's message and a code (`BAD_REQUEST`, `NOT_FOUND`, `CONFLICT`, ...), mapped from `AppException` by an error filter.
+- Query depth is capped and exception details are never sent to clients.
+- `GraphQLTests` runs real GraphQL documents against the schema, checking company isolation, auth, errors and the full swap flow.
+
+In Development, open `/graphql` in a browser for the Nitro IDE.
 
 ## How it's put together
 
