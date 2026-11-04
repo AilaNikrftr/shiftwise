@@ -60,8 +60,18 @@ public class GraphQLTests : IDisposable
             request.SetUser(SignedIn(user));
         }
 
-        var result = await executor.ExecuteAsync(request.Build());
-        return JsonDocument.Parse(result.ToJson()).RootElement.Clone();
+        var result = (IOperationResult)await executor.ExecuteAsync(request.Build());
+
+        // Turn the typed result into the same JSON shape a client would receive.
+        var json = new Dictionary<string, object?> { ["data"] = result.Data };
+        if (result.Errors is { Count: > 0 } errors)
+        {
+            json["errors"] = errors
+                .Select(e => new { message = e.Message, extensions = new { code = e.Code } })
+                .ToList();
+        }
+
+        return JsonSerializer.SerializeToElement(json);
     }
 
     private static string? ErrorCode(JsonElement result) =>
