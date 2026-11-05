@@ -1,5 +1,7 @@
 # ShiftWise
 
+[![CI](https://github.com/AilaNikrftr/shiftwise/actions/workflows/ci.yml/badge.svg)](https://github.com/AilaNikrftr/shiftwise/actions/workflows/ci.yml)
+
 Shift scheduling for small businesses like cafés, clinics and shops. Managers build the weekly schedule, employees ask coworkers to take shifts they can't work, managers approve the swap, and the hours report exports straight to CSV for payroll.
 
 Each business only ever sees its own staff, shifts and requests, even though they all share one database.
