@@ -21,10 +21,22 @@ if (Encoding.UTF8.GetByteCount(jwt.SigningKey) < 32)
 
 builder.Services.Configure<JwtOptions>(jwtSection);
 
+// SQL Server is the real database. "Sqlite" exists so the end-to-end browser
+// tests can start the whole API in a few seconds without a SQL Server container.
+var dbProvider = builder.Configuration.GetValue<string>("Database:Provider") ?? "SqlServer";
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("Default"),
-        sql => sql.EnableRetryOnFailure()));
+{
+    if (string.Equals(dbProvider, "Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite") ?? "Data Source=shiftwise-e2e.db");
+    }
+    else
+    {
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("Default"),
+            sql => sql.EnableRetryOnFailure());
+    }
+});
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

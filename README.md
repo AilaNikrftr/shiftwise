@@ -55,6 +55,31 @@ cd client && npm test           # client
 
 CI runs both on every push and pull request.
 
+### End-to-end tests (Playwright)
+
+14 browser tests in `client/e2e/` drive the real Angular client against the real API, the way a manager or employee would use it:
+
+- **Sign-in and roles:** redirect when signed out, wrong password, manager vs employee navigation, employees blocked from `/team` and `/hours` even by typing the URL, sign-out, registering a new business (and checking none of the demo café's staff leak into it).
+- **Team:** a manager adds an employee, who can then sign in with the temporary password; a duplicate email is refused.
+- **Scheduling:** add a shift and watch the weekly hours column update; double-booking is refused; edit a shift, then delete it (including the confirm dialog).
+- **Swaps:** an employee asks a coworker to take an upcoming shift, the manager approves it, and the shift moves to the coworker on the schedule.
+- **Hours report:** the total matches the rows, and the CSV export downloads with the right file name and contents.
+
+```bash
+cd client
+npx playwright install chromium   # first time only
+npx playwright test               # starts the API and the dev server itself
+```
+
+How it's set up:
+
+- `playwright.config.ts` starts both servers. The API runs with `Database:Provider=Sqlite` and a brand-new database file each run, seeded with the demo café, so every run starts from the same data without needing a SQL Server container. Normal runs still use SQL Server.
+- Data a test needs but isn't testing (for example a shift two weeks out for the swap test) is created through the API first, so each test only clicks through the part it checks.
+- Tests that change data use next week or unique emails, so they never collide with the seeded week or with each other.
+- Angular settles a form's initial values on the first render after its data loads, so tests wait for that (for example, the team list) before typing. `fillStable` re-checks that a typed value stuck.
+- Output goes to `.e2e/` at the repo root, outside `client/`. If it were inside, the dev server would see trace files being written and reload the page mid-test.
+- In CI the `e2e` job runs after the API and client jobs pass, and uploads traces and screenshots if anything fails.
+
 ## API
 
 All routes except register and login need `Authorization: Bearer <token>`.
