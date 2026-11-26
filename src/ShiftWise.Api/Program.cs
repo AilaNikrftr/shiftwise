@@ -9,6 +9,7 @@ using ShiftWise.Api.Common;
 using ShiftWise.Api.Data;
 using ShiftWise.Api.Domain;
 using ShiftWise.Api.Services;
+using ShiftWise.Api.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,14 @@ builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<ShiftService>();
 builder.Services.AddScoped<SwapService>();
 builder.Services.AddScoped<ReportService>();
+
+// Optional: archive payroll CSVs to Azure Blob Storage (or Azurite locally).
+var archiveSection = builder.Configuration.GetSection("PayrollArchive");
+builder.Services.Configure<PayrollArchiveOptions>(archiveSection);
+if (archiveSection.Get<PayrollArchiveOptions>() is { IsConfigured: true })
+{
+    builder.Services.AddSingleton<PayrollArchive>();
+}
 
 var app = builder.Build();
 
