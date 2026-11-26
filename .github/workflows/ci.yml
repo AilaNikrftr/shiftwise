@@ -22,6 +22,19 @@ jobs:
       - name: Build
         run: dotnet build ShiftWise.slnx --no-restore --configuration Release
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Local Blob Storage emulator for the payroll-archive tests.
+      - name: Start Azurite
+        run: |
+          npx --yes azurite@3 azurite-blob --silent --location "$RUNNER_TEMP/azurite" --blobHost 127.0.0.1 --blobPort 10000 &
+          for i in $(seq 1 30); do
+            curl -s -o /dev/null "http://127.0.0.1:10000/devstoreaccount1?comp=list" && break
+            sleep 1
+          done
+
       - name: Test
         run: dotnet test ShiftWise.slnx --no-build --configuration Release --verbosity normal
 
