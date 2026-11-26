@@ -18,3 +18,8 @@ Thumbs.db
 # Local secrets
 appsettings.Local.json
 .env
+
+# Azurite local storage
+.azurite/
+__azurite_db_*
+__blobstorage__/
